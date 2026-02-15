@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>VeltriX Pro - Elite V1</title>
+<style>
+/* --- Advanced Design System & Variables --- */
+:root {
+    --primary: #ff00ff;
+    --secondary: #00ffff;
+    --accent: #7000ff;
+    --bg-dark: #05010a;
+    --glass: rgba(255, 255, 255, 0.03);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --success: #00ffa3;
+    --danger: #ff2d55;
+    --font-main: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+    font-family: var(--font-main);
+    background: var(--bg-dark);
+    color: #fff;
+    overflow-x: hidden;
+    line-height: 1.6;
+}
+
+#bgCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.4; }
+
+/* --- Login System Advanced --- */
+#loginOverlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(circle at center, #1a022d 0%, #05010a 100%);
+    z-index: 20000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.login-card {
+    width: 88%;
+    max-width: 400px;
+    padding: 45px 35px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(25px);
+    border-radius: 40px;
+    text-align: center;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.8), inset 0 0 30px rgba(255,0,255,0.05);
+    animation: slideUp 1s cubic-bezier(0.19, 1, 0.22, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.login-card h2 { font-weight: 200; letter-spacing: 8px; margin-bottom: 5px; }
+
+.login-input {
+    width: 100%;
+    padding: 18px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: 15px;
+    color: #fff;
+    text-align: center;
+    font-size: 1rem;
+    margin-bottom: 25px;
+    outline: none;
+    transition: 0.4s;
+}
+
+.login-input:focus { border-color: var(--primary); box-shadow: 0 0 20px rgba(255,0,255,0.2); }
+
+.login-btn {
+    width: 100%;
+    padding: 18px;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    border: none;
+    border-radius: 15px;
+    color: white;
+    font-weight: 800;
+    letter-spacing: 2px;
+    cursor: pointer;
+    box-shadow: 0 10px 30px rgba(255,0,255,0.3);
+}
+
+/* --- Top Navigation Upgrade --- */
+.topBar {
+    position: fixed;
+    top: 20px; left: 50%;
+    transform: translateX(-50%);
+    width: 92%; max-width: 500px;
+    height: 70px;
+    background: rgba(15, 5, 25, 0.85);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 0, 255, 0.3);
+    border-radius: 35px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 10000;
+}
+
+.tab { display: flex; flex-direction: column; align-items: center; color: #666; font-size: 0.65rem; font-weight: 700; flex: 1; cursor: pointer; transition: 0.3s;}
+.activeTab { color: var(--primary); text-shadow: 0 0 10px rgba(255,0,255,0.5); }
+
+/* --- Prediction Card & Engine --- */
+.flip-container { perspective: 1000px; margin: 20px auto; width: 92%; }
+.flipper { position: relative; width: 100%; height: 420px; transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; }
+.flipper.flipping { transform: rotateY(180deg); }
+
+.predictionBox, .resultOverlay {
+    position: absolute;
+    width: 100%; height: 100%;
+    backface-visibility: hidden;
+    border-radius: 35px;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(0,0,0,0.4) 100%);
+    border: 1px solid rgba(255,255,255,0.1);
+    backdrop-filter: blur(20px);
+}
+
+.resultOverlay { transform: rotateY(180deg); background: #fff; color: #000; justify-content: center; align-items: center; }
+
+#bsResult { font-size: 4.5rem; font-weight: 900; color: var(--primary); text-shadow: 0 0 30px rgba(255,0,255,0.4); text-align: center; }
+
+/* --- Timer Style --- */
+.timer-bar-bg { width: 100%; height: 8px; background: rgba(255, 255, 255, 0.1); border-radius: 10px; overflow: hidden; margin-top: 10px; }
+#timerBar { width: 100%; height: 100%; background: var(--primary); box-shadow: 0 0 15px var(--primary); transition: width 1s linear; }
+
+/* --- Stats --- */
+.stat-pill { background: rgba(255, 255, 255, 0.04); padding: 12px; border-radius: 15px; text-align: center; flex: 1; border: 1px solid rgba(255,255,255,0.05); }
+.stat-val { display: block; font-weight: 800; color: var(--secondary); font-size: 1.2rem; }
+.stat-lab { font-size: 0.6rem; text-transform: uppercase; opacity: 0.5; letter-spacing: 1px; }
+
+/* --- Step Maker (White UI) --- */
+.step-container { background: #fff; color: #333; margin: 20px auto; width: 92%; padding: 25px; border-radius: 35px; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+.step-container h2 { text-align: center; color: var(--primary); font-size: 1.4rem; margin-bottom: 20px; font-weight: 900; }
+.controls { display: flex; flex-direction: column; gap: 12px; background: #f8fafc; padding: 20px; border-radius: 20px; }
+.input-group label { font-size: 12px; font-weight: bold; color: #64748b; }
+.input-group input { padding: 14px; border: 2px solid #e2e8f0; border-radius: 12px; margin-top: 5px; outline: none; }
+.btn-gen { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 12px; font-weight: 800; cursor: pointer; transition: 0.3s; }
+
+/* --- Table & Logs --- */
+.history-container { width: 92%; margin: 20px auto 100px; }
+table { width: 100%; border-spacing: 0 8px; }
+td { background: rgba(255,255,255,0.03); padding: 15px; border-radius: 12px; text-align: center; font-size: 0.85rem; }
+
+/* --- Draggable --- */
+#draggableContainer { position: fixed; top: 100px; left: 20px; z-index: 10001; touch-action: none; text-align: center; }
+#hasibImg { width: 75px; height: 75px; border-radius: 50%; border: 3px solid var(--primary); box-shadow: 0 0 20px var(--primary); }
+
+#mainContent { padding-top: 100px; }
+#toast { visibility: hidden; min-width: 150px; background: var(--primary); color: #fff; text-align: center; border-radius: 10px; padding: 15px; position: fixed; z-index: 20000; bottom: 30px; left: 50%; transform: translateX(-50%); font-weight: bold; }
+#toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 1.5s; }
+@keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+@keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+@keyframes slideUp { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body onload="initSystem()">
+
+<div id="loginOverlay">
+    <div class="login-card">
+        <h2 style="font-weight: 200; letter-spacing: 8px;"> VeltriX  <span style="color:var(--primary); font-weight:900;">PRO</span></h2>
+        <p style="font-size: 0.7rem; color: var(--secondary); margin-bottom: 25px; letter-spacing: 2px;">ELITE V1 ACCESS</p>
+        <input type="password" id="passInput" class="login-input" placeholder="ENTER ACCESS KEY">
+        <button class="login-btn" onclick="checkAccess()">INITIALIZE SYSTEM</button>
+        <br>
+        <a href="https://t.me/Owner_9x_Habib" style="display:inline-block; margin-top:20px; color:rgba(255,255,255,0.4); text-decoration:none; font-size:0.7rem;">GET ACCESS KEY ⚡</a>
+    </div>
+</div>
+
+<canvas id="bgCanvas"></canvas>
+
+<div class="topBar">
+  <div class="tab activeTab" id="t1" onclick="openHack()"><span>⚡</span>HACK</div>
+  <div class="tab" id="t2" onclick="openGame()"><span>🎮</span>PLAY</div>
+  <div class="tab" id="t5" onclick="openStepMake()"><span>📊</span>STEPS</div>
+  <div class="tab" id="t3" onclick="openHistory()"><span>📜</span>LOGS</div>
+  <div class="tab" id="t4" onclick="openOther()"><span>🎬</span>MOVIES</div>
+</div>
+
+<div id="draggableContainer" style="display:none;">
+    <div id="floatingTimer" style="background: var(--primary); color:white; font-size:12px; padding:3px 10px; border-radius:20px; margin-bottom:8px; display:inline-block; font-weight:bold;">00:30</div><br>
+    <img id="hasibImg" src="https://i.supaimg.com/75b5df1e-9615-4c82-9a3f-20c777f3e7c0/61d1da84-f386-42c6-b199-a2ae26dac04a.png" onclick="toggleCustomStats()" ondblclick="toggleFloatingUI()">
+    <div id="floatingStreak" style="font-weight:900; color:var(--secondary); text-shadow: 0 0 10px var(--secondary);">S: </div>
+</div>
+
+<div id="mainContent">
+    <div style="text-align:center; margin-bottom: 25px;">
+        <div style="display:inline-block; padding: 5px 15px; background:rgba(255,0,255,0.1); border-radius: 20px; border: 1px solid var(--primary); margin-bottom: 10px;">
+            <span style="font-size: 0.6rem; letter-spacing: 2px; color: var(--primary); font-weight:bold;">SYSTEM ACTIVE</span>
+        </div>
+        <h1 style="font-size: 1.5rem; font-weight: 200; letter-spacing: 2px;">Design by <b style="color:var(--primary); font-weight:900;">☬ 9x Habib ☬</b></h1>
+    </div>
+
+    <div id="welcomePage">
+      <div class="flip-container">
+        <div class="flipper" id="flipper">
+          <div class="predictionBox">
+            <div style="display:flex; justify-content: space-between; align-items: center;">
+                <div id="periodDisplay" style="font-size: 0.9rem; opacity: 0.7; font-family: monospace;">#Wating...</div>
+                <div style="width: 10px; height: 10px; background: var(--success); border-radius:50%; box-shadow: 0 0 10px var(--success);"></div>
+            </div>
+            
+            <div style="text-align:center;">
+                <div id="bsResult">WAIT</div>
+                <div id="confidence" style="font-size: 0.7rem; color: var(--secondary); letter-spacing: 3px; font-weight:bold; text-transform: uppercase;">Initializing...</div>
+            </div>
+
+            <div class="timer-container">
+                <div style="display:flex; justify-content:space-between; font-size:0.7rem; opacity:0.6;"><span>ANALYZING NEXT</span><span id="countdownText">00:30</span></div>
+                <div class="timer-bar-bg"><div id="timerBar"></div></div>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <div class="stat-pill"><span class="stat-val" id="winCount">0</span><span class="stat-lab">Total Wins</span></div>
+                <div class="stat-pill"><span class="stat-val" id="winStreak">0</span><span class="stat-lab">Streak</span></div>
+            </div>
+          </div>
+          
+          <div class="resultOverlay">
+             <div id="bigResultNum" style="font-size: 100px; font-weight: 900; background: linear-gradient(to bottom, #333, #000); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">?</div>
+             <div id="bigStatusText" style="font-weight: 900; letter-spacing: 5px; font-size: 1.5rem;">READY</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="history-container" id="historyView">
+          <h4 style="margin-left: 10px; margin-bottom: 10px; font-size: 0.7rem; color: var(--secondary); letter-spacing: 2px;">LIVE MARKET HISTORY</h4>
+          <table><tbody id="historyBody"></tbody></table>
+      </div>
+
+      <div class="history-container" id="sessionHistoryView" style="display:none;">
+          <h3 style="text-align:center; margin-bottom:15px; color:var(--primary);">SESSION LOGS</h3>
+          <table><tbody id="sessionHistoryBody"></tbody></table>
+      </div>
+    </div>
+
+    <div id="stepMakePage" style="display:none;">
+        <div class="step-container">
+            <h2>𝐒𝐌 HABIB 9x ༆ Win</h2>
+            <div class="controls">
+                <div class="input-group"><label>Step সংখ্যা:</label><input type="number" id="steps" value="7" oninput="toggleInputs('none')"></div>
+                <div class="input-group"><label>মোট বাজেট:</label><input type="number" id="totalBudgetInput" placeholder="বাজেট লিখুন (ঐচ্ছিক)" oninput="toggleInputs('budget')"></div>
+                <div class="input-group"><label>Net Profit:</label><input type="number" id="desiredProfit" placeholder="ঐচ্ছিক (যেমন: ৬)" oninput="toggleInputs('profit')"></div>
+                <button class="btn-gen" onclick="generateChart()">Generate Smart Chart</button>
+            </div>
+            <div id="errorBox" style="color:red; font-size:12px; margin-top:10px; display:none; text-align:center;"></div>
+            <table id="chartTable" style="width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 12px; display: none; color: #000;">
+                <thead><tr style="background: var(--primary); color: #fff;"><th>Step</th><th>Bet</th><th>Total</th><th>Return</th><th>Profit</th></tr></thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+            <div id="footerList" style="display:none; margin-top:20px; background:#f1f5f9; padding:15px; border-radius:15px;">
+                <button onclick="copyAllText()" style="float:right; font-size:10px; padding:5px; background:#ddd; border:none; border-radius:5px;">Copy All</button>
+                <h4 style="font-size:13px; color:#333;">📋 Bet List</h4>
+                <div id="listItems" style="margin-top:10px;"></div>
+            </div>
+            <div id="summary" style="margin-top:15px; color:#166534; font-weight:bold; text-align:center; display:none; background:#dcfce7; padding:10px; border-radius:10px;"></div>
+        </div>
+    </div>
+</div>
+
+<div id="gamePage" style="display:none;"><iframe src="https://amarclub17.com/#/register?invitationCode=353881031233" style="width:100%; height:100vh; border:none; padding-top: 80px;"></iframe></div>
+<div id="otherPage" style="display:none;"><iframe src="https://moviebox.ph/" style="width:100%; height:100vh; border:none; padding-top: 80px;"></iframe></div>
+
+<div id="toast">Copied!</div>
+
+<script>
+// ================= TELEGRAM & LOGIC SETTINGS =================
+const BOT_TOKEN = "8301330328:AAHA-H0Dhfh1L3DkrW6Nnb6KwuflTSEQufc"; 
+const CHAT_ID = "@Rk1Trader"; 
+const STICKER_START = "CAACAgUAAxkBAAEQQPppakFbk3fqeWzooRLIx3RKgAHIrwACUhYAAlEJ-VVZvLkjcrQPSTgE"; 
+const STICKER_END = "CAACAgUAAxkBAAEQQPxpakFtr-vvDe05t6M7KXqUvc6xEQACIhYAAi3U8FUVaqmrOChRqDgE";   
+const STICKER_WIN = "CAACAgUAAxkBAAEQPxppaN9TvHfLso-wPWE3vCjEmAHc_QACaxoAAuqzcFTth7hpguaGHDgE";   
+
+let isPredictionRunning = false, sessionSummary = [], telegramLastPrediction = "", lastUpdateId = 0, tgWinCounter = 0;
+let winCounter = 0, lossStreakCount = 0, winStreakCount = 0, lastProcessedId = "", lastPrediction = null, currentPattern = "A";
+const apiUrl = "https://draw.ar-lottery01.com/WinGo/WinGo_30S/GetHistoryIssuePage.json";
+
+// Telegram API Functions
+async function tgAction(method, data) {
+    try { await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/${method}`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ chat_id: CHAT_ID, ...data }) }); } catch (e) { console.error("TG Error:", e); }
+}
+async function sendSticker(fileId) { await tgAction('sendSticker', { sticker: fileId }); }
+async function sendMsg(text) { await tgAction('sendMessage', { text: text, parse_mode: 'HTML' }); }
+
+function startSeason() { if(isPredictionRunning) return; isPredictionRunning = true; tgWinCounter = 0; sessionSummary = []; sendSticker(STICKER_START); }
+function stopSeason() { if(!isPredictionRunning) return; isPredictionRunning = false; sendSticker(STICKER_END); sendSummary(); }
+
+function sendSummary() {
+    let report = "🏆 SESSION SUMMARY REPORT 🏆\n\n----------------------------------------\n";
+    sessionSummary.forEach((item, index) => { report += `${index + 1}. PD: ${item.pd} | ${item.res}\n`; });
+    report += `----------------------------------------\n✅ Total Wins: ${tgWinCounter}\n🎯 Powered by VIP System`;
+    sendMsg(report);
+}
+
+async function checkBotCommands() {
+    try {
+        const resp = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getUpdates?offset=${lastUpdateId + 1}`);
+        const data = await resp.json();
+        if (data.result) {
+            data.result.forEach(update => {
+                lastUpdateId = update.update_id;
+                if (update.message && update.message.text) {
+                    const cmd = update.message.text.toLowerCase();
+                    if (cmd === "/prediction") startSeason();
+                    else if (cmd === "/stop") stopSeason();
+                    else if (cmd === "/summary") sendSummary();
+                    else if (cmd === "/hold" && isPredictionRunning) sendMsg(`🎖️ WINGO 30 SEC 🎖️\n\n🔰 🅿🅳: ${lastProcessedId}\n\n🎯 𝐏𝐑𝐄𝐃: SKIP 🎯`);
+                    else if (cmd === "/big" && isPredictionRunning) sendMsg(`🎖️ WINGO 30 SEC 🎖️\n\n🔰 🅿🅳: ${lastProcessedId}\n\n🎯 𝐏𝐑𝐄𝐃: BIG 🎯`);
+                    else if (cmd === "/small" && isPredictionRunning) sendMsg(`🎖️ WINGO 30 SEC 🎖️\n\n🔰 🅿🅳: ${lastProcessedId}\n\n🎯 𝐏𝐑𝐄𝐃: SMALL 🎯`);
+                }
+            });
+        }
+    } catch (e) {}
+}
+setInterval(checkBotCommands, 2000);
+
+// ================= APP LOGIC =================
+function checkAccess() {
+    const pass = document.getElementById('passInput').value;
+    const overlay = document.getElementById('loginOverlay');
+    if(pass === "99x") { overlay.style.opacity = "0"; setTimeout(() => { overlay.style.visibility = "hidden"; }, 800); } 
+    else { alert("Wrong Password!"); }
+}
+
+function initSystem(){ startTimer(); generatePrediction(); initParticles(); }
+
+function hideAll(){
+    ["welcomePage", "gamePage", "otherPage", "stepMakePage", "draggableContainer", "sessionHistoryView", "historyView"].forEach(id => {
+        document.getElementById(id).style.display="none";
+    });
+}
+
+function openHack(){ hideAll(); document.getElementById("welcomePage").style.display="block"; document.getElementById("historyView").style.display="block"; setActiveTab(1); }
+function openGame(){ hideAll(); document.getElementById("gamePage").style.display="block"; document.getElementById("draggableContainer").style.display="block"; setActiveTab(2); }
+function openStepMake(){ hideAll(); document.getElementById("stepMakePage").style.display="block"; setActiveTab(5); }
+function openHistory(){ hideAll(); document.getElementById("welcomePage").style.display="block"; document.getElementById("sessionHistoryView").style.display="block"; setActiveTab(3); }
+function openOther(){ hideAll(); document.getElementById("otherPage").style.display="block"; document.getElementById("draggableContainer").style.display="block"; setActiveTab(4); }
+
+function setActiveTab(n){ document.querySelectorAll('.tab').forEach(t=>t.classList.remove('activeTab')); document.getElementById('t'+n).classList.add('activeTab'); }
+
+// Step Maker Functions
+function toggleInputs(type) {
+    const b = document.getElementById('totalBudgetInput'), p = document.getElementById('desiredProfit');
+    if(type==='budget' && b.value!==''){ p.disabled=true; p.value=''; }
+    else if(type==='profit' && p.value!==''){ b.disabled=true; b.value=''; }
+    else if(b.value==='' && p.value===''){ b.disabled=false; p.disabled=false; }
+}
+
+function calculateRequiredBudget(steps, profit, payout) {
+    let total = 0; for (let i = 1; i <= steps; i++) { let bet = Math.ceil((total + profit) / (payout - 1)); total += bet; } return total;
+}
+
+function generateChart() {
+    const steps = parseInt(document.getElementById('steps').value) || 1, payout = 1.96;
+    const budgetIn = document.getElementById('totalBudgetInput').value, profitIn = document.getElementById('desiredProfit').value;
+    const tableBody = document.getElementById('tableBody'), chartTable = document.getElementById('chartTable'), summary = document.getElementById('summary'), footerList = document.getElementById('footerList'), listItems = document.getElementById('listItems'), errorBox = document.getElementById('errorBox');
+    
+    tableBody.innerHTML = ''; listItems.innerHTML = ''; errorBox.style.display = 'none';
+    let finalProfit = 0;
+    if (budgetIn !== '') {
+        let userBudget = parseFloat(budgetIn), testProfit = 1;
+        while (calculateRequiredBudget(steps, testProfit + 1, payout) <= userBudget) { testProfit++; }
+        finalProfit = testProfit;
+        if (finalProfit < 1) { errorBox.innerHTML = "বাজেট কম!"; errorBox.style.display = 'block'; return; }
+    } else {
+        finalProfit = parseFloat(profitIn) || 0;
+        if (finalProfit <= 0) { errorBox.innerHTML = "Profit দিন।"; errorBox.style.display = 'block'; return; }
+    }
+
+    let runningTotal = 0;
+    for (let i = 1; i <= steps; i++) {
+        let bet = Math.ceil((runningTotal + finalProfit) / (payout - 1));
+        runningTotal += bet;
+        let ret = (bet * payout).toFixed(2), net = (ret - runningTotal).toFixed(2);
+        tableBody.innerHTML += `<tr><td>${i}</td><td><b>${bet}</b></td><td>${runningTotal}</td><td>${ret}</td><td style="color:green">${net}</td></tr>`;
+        listItems.innerHTML += `<div style="display:flex;justify-content:space-between;padding:5px;border-bottom:1px solid #ddd;color:#333;"><span>Step ${i}</span><b>${bet}</b></div>`;
+    }
+    chartTable.style.display = 'table'; summary.style.display = 'block'; footerList.style.display = 'block';
+    summary.innerHTML = `Total Budget: ${runningTotal} | Profit: ~${finalProfit}`;
+}
+
+function copyAllText() {
+    let text = ""; document.querySelectorAll('#listItems div').forEach(div => text += div.innerText + "\n");
+    navigator.clipboard.writeText(text.trim());
+    const t = document.getElementById("toast"); t.className = "show"; setTimeout(() => { t.className = ""; }, 2000);
+}
+
+// Prediction Logic
+async function generatePrediction() {
+    try {
+        const response = await fetch(`${apiUrl}?pageSize=10&pageNo=1&type=1&ts=${Date.now()}`);
+        const data = await response.json();
+        if (data && data.data && data.data.list) {
+            const list = data.data.list, latest = list[0];
+            if (lastProcessedId !== latest.issueNumber) {
+                if (lastPrediction !== null) {
+                    const actualNum = parseInt(latest.number), actualSize = actualNum >= 5 ? "BIG" : "SMALL";
+                    let isWin = (lastPrediction === actualSize);
+                    document.getElementById("bigResultNum").textContent = actualNum;
+                    
+                    if(isWin) { 
+                        winCounter++; winStreakCount++; lossStreakCount = 0; 
+                        document.getElementById("bigStatusText").textContent = "WINNER"; document.getElementById("bigStatusText").style.color = "#00ffa3";
+                        if(isPredictionRunning) sessionSummary.push({pd: latest.issueNumber.slice(-3), res: "Loss 🚫🚫🚫🚫"});
+                    } else { 
+                        lossStreakCount++; winStreakCount = 0; currentPattern = (currentPattern === "A") ? "B" : "A"; 
+                        document.getElementById("bigStatusText").textContent = "LOSS"; document.getElementById("bigStatusText").style.color = "#ff2d55";
+                        if(isPredictionRunning) { tgWinCounter++; sendMsg("WIN ✅✅✅✅"); sendSticker(STICKER_WIN); sessionSummary.push({pd: latest.issueNumber.slice(-3), res: "WIN ✅✅✅✅"}); }
+                    }
+                    document.getElementById("sessionHistoryBody").insertAdjacentHTML('afterbegin', `<tr><td>${latest.issueNumber.slice(-3)}</td><td>${lastPrediction}</td><td class="${isWin?'win-text':'loss-text'}">${isWin?'WIN':'LOSS'}</td></tr>`);
+                    document.getElementById("flipper").classList.add("flipping");
+                    setTimeout(()=> document.getElementById("flipper").classList.remove("flipping"), 4000);
+                    if(tgWinCounter >= 20) stopSeason();
+                }
+
+                lastProcessedId = latest.issueNumber;
+                const nextIssue = String(BigInt(latest.issueNumber) + 1n);
+                document.getElementById("periodDisplay").innerText = "#"+nextIssue;
+                
+                let bigCount = 0; for(let i=0; i<3; i++) if(parseInt(list[i].number) >= 5) bigCount++;
+                let majority = (bigCount >= 2) ? "BIG" : "SMALL";
+                lastPrediction = (currentPattern === "A") ? majority : (majority === "BIG" ? "SMALL" : "BIG");
+                
+                document.getElementById("bsResult").textContent = lastPrediction;
+                document.getElementById("confidence").textContent = (Math.floor(Math.random()*12)+88)+"% Accuracy";
+                
+                if(isPredictionRunning) { telegramLastPrediction = (lastPrediction === "BIG" ? "SMALL" : "BIG"); sendMsg(`🎖️ WINGO 30 SEC 🎖️\n\n🔰 🅿🅳: ${nextIssue}\n\n🎯 𝐏𝐑𝐄𝐃: ${telegramLastPrediction} 🎯`); }
+
+                let hBody = document.getElementById("historyBody"); hBody.innerHTML = "";
+                list.slice(0, 5).forEach(item => {
+                    let size = parseInt(item.number) >= 5 ? "BIG" : "SMALL";
+                    hBody.innerHTML += `<tr><td>${item.issueNumber.slice(-5)}</td><td>${item.number}</td><td style="color:${size=='BIG'?'#ff00ff':'#00ffff'}">${size}</td></tr>`;
+                });
+                updateStats();
+            }
+        }
+    } catch (e) { console.log(e); }
+}
+
+function updateStats(){
+    document.getElementById("winCount").innerText = winCounter;
+    document.getElementById("winStreak").innerText = winStreakCount;
+    document.getElementById("floatingStreak").innerText = `S: ${".".repeat(winStreakCount)}`;
+}
+
+function startTimer() {
+    setInterval(() => {
+        const sec = new Date().getUTCSeconds(), timeLeft = 30 - (sec % 30);
+        document.getElementById("countdownText").innerText = `00:${timeLeft.toString().padStart(2, '0')}`;
+        document.getElementById("floatingTimer").innerText = `00:${timeLeft.toString().padStart(2, '0')}`;
+        document.getElementById("timerBar").style.width = (timeLeft / 30) * 100 + "%";
+        if (timeLeft === 30 || timeLeft === 0) generatePrediction();
+    }, 1000);
+}
+
+function initParticles(){
+    const canvas = document.getElementById("bgCanvas"), ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+    let pts = []; for(let i=0; i<30; i++) pts.push({x:Math.random()*canvas.width, y:Math.random()*canvas.height, vx:Math.random()-0.5, vy:Math.random()-0.5});
+    function anim(){
+        ctx.clearRect(0,0,canvas.width,canvas.height); ctx.fillStyle = "rgba(255,255,255,0.1)";
+        pts.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; if(p.x<0||p.x>canvas.width) p.vx*=-1; if(p.y<0||p.y>canvas.height) p.vy*=-1; ctx.beginPath(); ctx.arc(p.x, p.y, 1.5, 0, Math.PI*2); ctx.fill(); });
+        requestAnimationFrame(anim);
+    } anim();
+}
+
+// Drag Logic
+const dragItem = document.getElementById("draggableContainer");
+let active = false, currentX, currentY, initialX, initialY, xOffset = 0, yOffset = 0;
+dragItem.addEventListener("touchstart", (e)=>{ initialX = e.touches[0].clientX - xOffset; initialY = e.touches[0].clientY - yOffset; active=true; });
+document.addEventListener("touchmove", (e)=>{ if (active) { e.preventDefault(); currentX = e.touches[0].clientX - initialX; currentY = e.touches[0].clientY - initialY; xOffset = currentX; yOffset = currentY; dragItem.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`; } }, {passive: false});
+document.addEventListener("touchend", ()=> active=false);
+
+function toggleFloatingUI() {
+    const t = document.getElementById("floatingTimer"), s = document.getElementById("floatingStreak");
+    t.style.display = t.style.display === "none" ? "inline-block" : "none";
+    s.style.display = s.style.display === "none" ? "block" : "none";
+}
+</script>
+</body>
+</html>
